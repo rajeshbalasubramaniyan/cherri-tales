@@ -1,6 +1,6 @@
 import { moods, characters, worlds, magicElements, lengths } from '../components/StoryOptions'
 
-const API_BASE = import.meta.env.VITE_API_BASE || ''
+const API_URL = import.meta.env.VITE_API_BASE || ''
 
 const ANTHRA_STORY = `Once upon a Tuesday, in a forest that liked to rearrange itself when nobody was looking, there lived a young lad named Pippin. Pippin was well-meaning and utterly clueless. He once tried to milk a mailbox because someone told him it had deliveries.
 
@@ -100,14 +100,14 @@ Important guidelines:
 }
 
 export async function generateStory(childName, selections) {
-  if (!API_BASE) {
+  if (!API_URL) {
     return ANTHRA_STORY
   }
 
   const prompt = buildPrompt(childName, selections)
 
   try {
-    const response = await fetch(`${API_BASE}/generateStory`, {
+    const response = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ childName, prompt }),

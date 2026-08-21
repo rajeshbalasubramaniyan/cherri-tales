@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE || ''
+const TTS_URL = import.meta.env.VITE_TTS_BASE || ''
 
 const VOICES = [
   { id: 'warm_female', label: 'Aria (Warm)', description: 'Warm and gentle' },
@@ -12,15 +12,15 @@ export function getAvailableVoices() {
   return VOICES
 }
 
-export async function synthesizeSpeech(text, voiceId = 'warm_female', rate = '-5%') {
-  if (!API_BASE) {
+export async function synthesizeSpeech(text, voiceId = 'warm_female') {
+  if (!TTS_URL) {
     return null
   }
 
-  const response = await fetch(`${API_BASE}/textToSpeech`, {
+  const response = await fetch(TTS_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text, voice: voiceId, rate }),
+    body: JSON.stringify({ text, voice: voiceId }),
   })
 
   if (!response.ok) {
@@ -32,5 +32,5 @@ export async function synthesizeSpeech(text, voiceId = 'warm_female', rate = '-5
 }
 
 export function isAPIAvailable() {
-  return !!API_BASE
+  return !!TTS_URL
 }

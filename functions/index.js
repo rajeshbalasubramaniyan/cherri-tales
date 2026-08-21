@@ -1,24 +1,13 @@
 import { onRequest } from 'firebase-functions/v2/https'
-import { defineString } from 'firebase-functions/params'
+import { defineSecret } from 'firebase-functions/params'
 
-const GROQ_API_KEY = defineString('GROQ_API_KEY')
-
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-}
+const GROQ_API_KEY = defineSecret('GROQ_API_KEY')
 
 const SYSTEM_PROMPT = `You are a warm, creative storyteller who writes wonderful bedtime stories for children. Your stories are imaginative, funny, age-appropriate, and always end on a positive note. You write with charm and wit that both children and parents enjoy. Never include scary, violent, or inappropriate content.`
 
 export const generateStory = onRequest(
-  { region: 'asia-south1', cors: true },
+  { region: 'asia-south1', cors: true, secrets: [GROQ_API_KEY] },
   async (req, res) => {
-    if (req.method === 'OPTIONS') {
-      res.set(CORS_HEADERS).status(204).send('')
-      return
-    }
-
     if (req.method !== 'POST') {
       res.status(405).send('Method not allowed')
       return
@@ -56,7 +45,7 @@ export const generateStory = onRequest(
       const data = await response.json()
       const story = data.choices[0]?.message?.content
 
-      res.set(CORS_HEADERS).json({ story })
+      res.json({ story })
     } catch (error) {
       console.error('Story generation error:', error)
       res.status(500).json({ error: 'Failed to generate story' })
@@ -64,7 +53,7 @@ export const generateStory = onRequest(
   }
 )
 
-const EDGE_TTS_VOICES = {
+const VOICE_MAP = {
   warm_female: 'en-US-AriaNeural',
   gentle_female: 'en-US-JennyNeural',
   friendly_male: 'en-US-GuyNeural',
@@ -73,39 +62,36 @@ const EDGE_TTS_VOICES = {
 }
 
 export const textToSpeech = onRequest(
-  { region: 'asia-south1', cors: true, memory: '512MiB' },
+  { region: 'asia-south1', cors: true, memory: '512MiB', timeoutSeconds: 120 },
   async (req, res) => {
-    if (req.method === 'OPTIONS') {
-      res.set(CORS_HEADERS).status(204).send('')
-      return
-    }
-
     if (req.method !== 'POST') {
       res.status(405).send('Method not allowed')
       return
     }
 
     try {
-      const { text, voice = 'warm_female', rate = '-5%' } = req.body
+      const { text, voice = 'warm_female' } = req.body
 
       if (!text) {
         res.status(400).json({ error: 'Missing text' })
         return
       }
 
-      const selectedVoice = EDGE_TTS_VOICES[voice] || EDGE_TTS_VOICES.warm_female
+      const voiceName = VOICE_MAP[voice] || VOICE_MAP.warm_female
 
-      const { EdgeTTS } = await import('edge-tts')
-      const tts = new EdgeTTS()
-      await tts.synthesize(text, selectedVoice, { rate })
+      const { MsEdgeTTS } = await import('msedge-tts')
+      const tts = new MsEdgeTTS()
+      await tts.setMetadata(voiceName, 'audio-24khz-96kbitrate-mono-mp3')
 
-      const audioBuffer = tts.toBuffer()
+      const readable = tts.toStream(text)
+      const chunks = []
+      for await (const chunk of readable) {
+        chunks.push(chunk)
+      }
+      const audioBuffer = Buffer.concat(chunks)
 
-      res.set({
-        ...CORS_HEADERS,
-        'Content-Type': 'audio/mpeg',
-        'Cache-Control': 'public, max-age=86400',
-      })
+      res.set('Content-Type', 'audio/mpeg')
+      res.set('Cache-Control', 'public, max-age=86400')
       res.send(audioBuffer)
     } catch (error) {
       console.error('TTS error:', error)
