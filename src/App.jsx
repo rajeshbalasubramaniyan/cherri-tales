@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import StarField from './components/StarField'
 import ParentSettings from './components/ParentSettings'
@@ -8,7 +8,9 @@ import NamePage from './pages/NamePage'
 import StoryBuilderPage from './pages/StoryBuilderPage'
 import GeneratingPage from './pages/GeneratingPage'
 import StoryPage from './pages/StoryPage'
+import DashboardPage from './pages/DashboardPage'
 import { generateStory, getAnthraStory } from './services/storyGenerator'
+import { saveStory, getStoryCount, getStreak } from './services/storyLibrary'
 
 export default function App() {
   const [screen, setScreen] = useState('welcome')
@@ -18,8 +20,8 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
   const [familyProfile, setFamilyProfile] = useState(null)
-  const [storiesRead, setStoriesRead] = useState(0)
   const [error, setError] = useState('')
+  const lastSelections = useRef(null)
 
   const handleStart = () => setScreen('name')
 
@@ -31,23 +33,28 @@ export default function App() {
   const handleGenerate = useCallback(async (selections) => {
     setScreen('generating')
     setError('')
+    lastSelections.current = selections
     try {
       const generatedStory = await generateStory(childName, selections)
+      const isDefault = generatedStory === getAnthraStory()
       setStory(generatedStory)
-      setIsAnthraStory(generatedStory === getAnthraStory())
+      setIsAnthraStory(isDefault)
       setScreen('story')
-      const newCount = storiesRead + 1
-      setStoriesRead(newCount)
-      if (newCount === 1 && !familyProfile) {
+
+      if (!isDefault) {
+        saveStory(childName, generatedStory, selections)
+      }
+
+      const storyCount = getStoryCount()
+      if (storyCount === 1 && !familyProfile) {
         setTimeout(() => setShowProfile(true), 3000)
       }
     } catch (err) {
-      setError('Could not create the story. Showing our favorite story instead!')
       setStory(getAnthraStory())
       setIsAnthraStory(true)
       setScreen('story')
     }
-  }, [childName, storiesRead, familyProfile])
+  }, [childName, familyProfile])
 
   const handleNewStory = () => setScreen('builder')
   const handleHome = () => {
@@ -62,10 +69,24 @@ export default function App() {
     setScreen('story')
   }
 
+  const handleDashboard = () => {
+    if (!childName) setChildName('Little One')
+    setScreen('dashboard')
+  }
+
+  const handleViewStory = (entry) => {
+    setStory(entry.story)
+    setChildName(entry.childName)
+    setIsAnthraStory(false)
+    setScreen('story')
+  }
+
   const handleSaveProfile = (data) => {
     setFamilyProfile(data)
     if (data.child.name) setChildName(data.child.name)
   }
+
+  const streak = getStreak()
 
   return (
     <div className="relative min-h-screen">
@@ -90,7 +111,13 @@ export default function App() {
       </div>
 
       {screen === 'welcome' && (
-        <WelcomePage onStart={handleStart} onReadAnthraStory={handleReadAnthraStory} />
+        <WelcomePage
+          onStart={handleStart}
+          onReadAnthraStory={handleReadAnthraStory}
+          onDashboard={handleDashboard}
+          streak={streak}
+          storyCount={getStoryCount()}
+        />
       )}
       {screen === 'name' && <NamePage onNext={handleName} />}
       {screen === 'builder' && (
@@ -104,6 +131,13 @@ export default function App() {
           isAnthraStory={isAnthraStory}
           onNewStory={handleNewStory}
           onHome={handleHome}
+        />
+      )}
+      {screen === 'dashboard' && (
+        <DashboardPage
+          childName={childName}
+          onHome={handleHome}
+          onViewStory={handleViewStory}
         />
       )}
 

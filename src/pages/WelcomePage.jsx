@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import Moon from '../components/Moon'
 
-export default function WelcomePage({ onStart, onReadAnthraStory }) {
+export default function WelcomePage({ onStart, onReadAnthraStory, onDashboard, streak, storyCount }) {
   return (
     <div className="min-h-[100dvh] flex flex-col items-center justify-center px-6 text-center relative z-10 py-8">
       <motion.div
@@ -35,11 +35,35 @@ export default function WelcomePage({ onStart, onReadAnthraStory }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.9, duration: 0.8 }}
-        className="text-moon/60 text-xs sm:text-sm mb-8 sm:mb-10 max-w-md"
+        className="text-moon/60 text-xs sm:text-sm mb-6 sm:mb-8 max-w-md"
       >
         Tell us your dream story and we'll make it come alive.
         A bedtime story made from your imagination.
       </motion.p>
+
+      {storyCount > 0 && (
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1 }}
+          onClick={onDashboard}
+          className="mb-6 bg-night-lighter/50 border border-purple/20 rounded-2xl px-5 py-3 cursor-pointer hover:border-purple/40 transition-colors"
+        >
+          <div className="flex items-center gap-4">
+            {streak.currentStreak > 0 && (
+              <div className="text-center">
+                <p className="text-gold font-display text-lg leading-none">{streak.currentStreak}</p>
+                <p className="text-purple-glow/40 text-[10px]">streak</p>
+              </div>
+            )}
+            <div className="text-center">
+              <p className="text-purple-glow/80 font-display text-lg leading-none">{storyCount}</p>
+              <p className="text-purple-glow/40 text-[10px]">{storyCount === 1 ? 'story' : 'stories'}</p>
+            </div>
+            <span className="text-purple-glow/30 text-xs">View journey →</span>
+          </div>
+        </motion.button>
+      )}
 
       <motion.button
         initial={{ opacity: 0, scale: 0.8 }}
@@ -50,7 +74,7 @@ export default function WelcomePage({ onStart, onReadAnthraStory }) {
         onClick={onStart}
         className="bg-gradient-to-r from-purple to-purple-light text-white font-display text-lg sm:text-xl px-8 sm:px-10 py-3 sm:py-4 rounded-full cursor-pointer shadow-lg"
       >
-        Start a Story
+        {storyCount > 0 ? "Tonight's Story" : 'Start a Story'}
       </motion.button>
 
       <motion.button
