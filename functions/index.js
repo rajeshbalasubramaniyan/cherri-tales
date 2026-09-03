@@ -63,8 +63,16 @@ export const generateStory = onRequest(
   }
 )
 
+const VOICE_MAP = {
+  warm_female: 'en-US-AriaNeural',
+  gentle_female: 'en-US-JennyNeural',
+  storyteller: 'en-US-AnaNeural',
+  british_female: 'en-GB-SoniaNeural',
+  friendly_male: 'en-US-GuyNeural',
+}
+
 export const textToSpeech = onRequest(
-  { region: 'asia-south1', cors: true, secrets: [GROQ_API_KEY], memory: '512MiB', timeoutSeconds: 120 },
+  { region: 'asia-south1', cors: true, memory: '512MiB', timeoutSeconds: 300 },
   async (req, res) => {
     if (req.method !== 'POST') {
       res.status(405).send('Method not allowed')
@@ -72,52 +80,29 @@ export const textToSpeech = onRequest(
     }
 
     try {
-      const { text, voice = 'Charon' } = req.body
+      const { text, voice = 'warm_female' } = req.body
 
       if (!text) {
         res.status(400).json({ error: 'Missing text' })
         return
       }
 
-      const response = await fetch('https://api.groq.com/openai/v1/audio/speech', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${GROQ_API_KEY.value()}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'playai/PlayDialog',
-          input: text,
-          voice: voice,
-          response_format: 'mp3',
-        }),
+      const voiceName = VOICE_MAP[voice] || VOICE_MAP.warm_female
+
+      const { MsEdgeTTS, OUTPUT_FORMAT } = await import('msedge-tts')
+      const tts = new MsEdgeTTS()
+      await tts.setMetadata(voiceName, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3)
+
+      const { audioStream } = await tts.toStream(text)
+      const chunks = []
+      await new Promise((resolve, reject) => {
+        audioStream.on('data', (chunk) => chunks.push(chunk))
+        audioStream.on('end', resolve)
+        audioStream.on('close', resolve)
+        audioStream.on('error', reject)
       })
 
-      if (!response.ok) {
-        const errText = await response.text()
-        console.error('Groq TTS error:', errText)
-
-        const { MsEdgeTTS } = await import('msedge-tts')
-        const tts = new MsEdgeTTS()
-        const VOICE_MAP = {
-          Charon: 'en-US-AriaNeural',
-          Kore: 'en-US-JennyNeural',
-          Fenrir: 'en-US-GuyNeural',
-          Aoede: 'en-GB-SoniaNeural',
-        }
-        await tts.setMetadata(VOICE_MAP[voice] || 'en-US-AriaNeural', 'audio-24khz-96kbitrate-mono-mp3')
-        const readable = tts.toStream(text)
-        const chunks = []
-        for await (const chunk of readable) { chunks.push(chunk) }
-        const audioBuffer = Buffer.concat(chunks)
-
-        res.set('Content-Type', 'audio/mpeg')
-        res.set('Cache-Control', 'public, max-age=86400')
-        res.send(audioBuffer)
-        return
-      }
-
-      const audioBuffer = Buffer.from(await response.arrayBuffer())
+      const audioBuffer = Buffer.concat(chunks)
 
       res.set('Content-Type', 'audio/mpeg')
       res.set('Cache-Control', 'public, max-age=86400')

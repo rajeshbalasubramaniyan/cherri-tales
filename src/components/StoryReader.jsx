@@ -2,188 +2,103 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { getAvailableVoices, synthesizeSpeech, isAPIAvailable } from '../services/ttsService'
 
-const SYSTEM_VOICE_PREFS = [
-  'Samantha (Enhanced)', 'Samantha', 'Karen', 'Moira',
-  'Google UK English Female', 'Microsoft Aria Online',
-  'Zoe (Enhanced)', 'Fiona',
-]
-
 export default function StoryReader({ story, onHighlight }) {
-  const [mode, setMode] = useState(isAPIAvailable() ? 'api' : 'system')
   const [playing, setPlaying] = useState(false)
   const [paused, setPaused] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [currentParagraph, setCurrentParagraph] = useState(-1)
+  const [error, setError] = useState(false)
   const [progress, setProgress] = useState(0)
-  const [selectedVoice, setSelectedVoice] = useState(
-    isAPIAvailable() ? 'warm_female' : null
-  )
-  const [systemVoices, setSystemVoices] = useState([])
-  const [selectedSystemVoice, setSelectedSystemVoice] = useState(null)
-  const [rate, setRate] = useState(0.85)
+  const [currentParagraph, setCurrentParagraph] = useState(-1)
+  const [selectedVoice, setSelectedVoice] = useState('warm_female')
 
   const audioRef = useRef(null)
-  const playingRef = useRef(false)
-  const indexRef = useRef(0)
-
+  const cacheRef = useRef({})
+  const voices = getAvailableVoices()
   const paragraphs = story.split('\n\n').filter(Boolean)
-  const apiVoices = getAvailableVoices()
-
-  useEffect(() => {
-    if (mode === 'system') {
-      const loadVoices = () => {
-        const available = speechSynthesis.getVoices()
-        const english = available.filter(v => v.lang.startsWith('en'))
-        setSystemVoices(english)
-        if (!selectedSystemVoice && english.length > 0) {
-          for (const pref of SYSTEM_VOICE_PREFS) {
-            const match = english.find(v => v.name.includes(pref))
-            if (match) { setSelectedSystemVoice(match); return }
-          }
-          setSelectedSystemVoice(english[0])
-        }
-      }
-      loadVoices()
-      speechSynthesis.onvoiceschanged = loadVoices
-    }
-    return () => {
-      speechSynthesis.cancel()
-      if (audioRef.current) {
-        audioRef.current.pause()
-        audioRef.current = null
-      }
-      playingRef.current = false
-    }
-  }, [mode])
 
   useEffect(() => {
     onHighlight?.(currentParagraph)
   }, [currentParagraph, onHighlight])
 
-  const stopAll = useCallback(() => {
-    speechSynthesis.cancel()
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current = null
+      }
+      Object.values(cacheRef.current).forEach(url => URL.revokeObjectURL(url))
+    }
+  }, [])
+
+  const stop = useCallback(() => {
     if (audioRef.current) {
       audioRef.current.pause()
       audioRef.current.currentTime = 0
     }
-    playingRef.current = false
     setPlaying(false)
     setPaused(false)
-    setCurrentParagraph(-1)
     setProgress(0)
-    setLoading(false)
-    indexRef.current = 0
+    setCurrentParagraph(-1)
   }, [])
 
-  const playWithAPI = useCallback(async () => {
+  const play = useCallback(async () => {
+    if (paused && audioRef.current) {
+      audioRef.current.play()
+      setPaused(false)
+      return
+    }
+
+    setError(false)
     setLoading(true)
     setPlaying(true)
-    playingRef.current = true
 
     try {
-      const fullText = paragraphs.join('\n\n')
-      const audioUrl = await synthesizeSpeech(fullText, selectedVoice)
+      const cacheKey = selectedVoice
+      let audioUrl = cacheRef.current[cacheKey]
 
-      if (!playingRef.current) return
+      if (!audioUrl) {
+        audioUrl = await synthesizeSpeech(story, selectedVoice)
+        if (!audioUrl) throw new Error('No audio')
+        cacheRef.current[cacheKey] = audioUrl
+      }
 
       const audio = new Audio(audioUrl)
       audioRef.current = audio
 
       audio.onended = () => {
         setPlaying(false)
-        setCurrentParagraph(-1)
+        setPaused(false)
         setProgress(100)
-        playingRef.current = false
+        setCurrentParagraph(-1)
       }
-
       audio.ontimeupdate = () => {
         if (audio.duration) {
-          const pct = (audio.currentTime / audio.duration) * 100
-          setProgress(pct)
-          const pIdx = Math.floor((audio.currentTime / audio.duration) * paragraphs.length)
-          setCurrentParagraph(Math.min(pIdx, paragraphs.length - 1))
+          setProgress((audio.currentTime / audio.duration) * 100)
+          const idx = Math.floor((audio.currentTime / audio.duration) * paragraphs.length)
+          setCurrentParagraph(Math.min(idx, paragraphs.length - 1))
         }
       }
-
       audio.onerror = () => {
-        stopAll()
+        setError(true)
+        setLoading(false)
+        setPlaying(false)
       }
 
       setLoading(false)
       await audio.play()
     } catch {
+      setError(true)
       setLoading(false)
-      stopAll()
-    }
-  }, [paragraphs, selectedVoice, stopAll])
-
-  const speakParagraphSystem = useCallback((index) => {
-    if (index >= paragraphs.length || !playingRef.current) {
       setPlaying(false)
-      setPaused(false)
-      setCurrentParagraph(-1)
-      setProgress(100)
-      playingRef.current = false
-      return
     }
-
-    setCurrentParagraph(index)
-    setProgress(Math.round((index / paragraphs.length) * 100))
-
-    const utt = new SpeechSynthesisUtterance(paragraphs[index])
-    if (selectedSystemVoice) utt.voice = selectedSystemVoice
-    utt.rate = rate
-    utt.pitch = 1.05
-
-    utt.onend = () => {
-      indexRef.current = index + 1
-      setTimeout(() => {
-        if (playingRef.current) speakParagraphSystem(index + 1)
-      }, 600)
-    }
-
-    utt.onerror = () => {
-      setPlaying(false)
-      setPaused(false)
-      setCurrentParagraph(-1)
-      playingRef.current = false
-    }
-
-    speechSynthesis.speak(utt)
-  }, [paragraphs, selectedSystemVoice, rate])
-
-  const play = useCallback(() => {
-    if (paused) {
-      if (mode === 'api' && audioRef.current) {
-        audioRef.current.play()
-      } else {
-        speechSynthesis.resume()
-      }
-      setPaused(false)
-      return
-    }
-
-    if (mode === 'api') {
-      playWithAPI()
-    } else {
-      speechSynthesis.cancel()
-      playingRef.current = true
-      setPlaying(true)
-      setPaused(false)
-      speakParagraphSystem(0)
-    }
-  }, [mode, paused, playWithAPI, speakParagraphSystem])
+  }, [paused, story, selectedVoice, paragraphs.length])
 
   const pause = useCallback(() => {
-    if (mode === 'api' && audioRef.current) {
-      audioRef.current.pause()
-    } else {
-      speechSynthesis.pause()
-    }
+    if (audioRef.current) audioRef.current.pause()
     setPaused(true)
-  }, [mode])
+  }, [])
 
-  const voiceOptions = mode === 'api' ? apiVoices : systemVoices
+  if (!isAPIAvailable()) return null
 
   return (
     <motion.div
@@ -194,7 +109,6 @@ export default function StoryReader({ story, onHighlight }) {
       <div className="flex items-center gap-3 mb-3">
         <span className="text-sm text-purple-glow/50 font-display">Read to me</span>
         <div className="flex-1" />
-
         {loading && (
           <span className="text-purple-glow/40 text-xs animate-pulse">Preparing voice...</span>
         )}
@@ -211,9 +125,8 @@ export default function StoryReader({ story, onHighlight }) {
             ))}
           </div>
         )}
-        {paused && (
-          <span className="text-purple-glow/40 text-xs">Paused</span>
-        )}
+        {paused && <span className="text-purple-glow/40 text-xs">Paused</span>}
+        {error && <span className="text-cherry/60 text-xs">Voice unavailable, please read below</span>}
       </div>
 
       <div className="flex items-center gap-3">
@@ -223,9 +136,10 @@ export default function StoryReader({ story, onHighlight }) {
             onClick={play}
             disabled={loading}
             className="w-11 h-11 rounded-full bg-purple flex items-center justify-center cursor-pointer hover:bg-purple-light transition-colors flex-shrink-0 disabled:opacity-50"
+            aria-label="Play"
           >
             <svg width="16" height="18" viewBox="0 0 16 18" fill="white">
-              <path d="M0 0L16 9L0 18V0Z"/>
+              <path d="M0 0L16 9L0 18V0Z" />
             </svg>
           </motion.button>
         ) : (
@@ -234,25 +148,27 @@ export default function StoryReader({ story, onHighlight }) {
               whileTap={{ scale: 0.9 }}
               onClick={paused ? play : pause}
               className="w-11 h-11 rounded-full bg-purple flex items-center justify-center cursor-pointer hover:bg-purple-light transition-colors"
+              aria-label={paused ? 'Resume' : 'Pause'}
             >
               {paused ? (
                 <svg width="14" height="16" viewBox="0 0 16 18" fill="white">
-                  <path d="M0 0L16 9L0 18V0Z"/>
+                  <path d="M0 0L16 9L0 18V0Z" />
                 </svg>
               ) : (
                 <svg width="12" height="14" viewBox="0 0 12 14" fill="white">
-                  <rect x="0" y="0" width="4" height="14"/>
-                  <rect x="8" y="0" width="4" height="14"/>
+                  <rect x="0" y="0" width="4" height="14" />
+                  <rect x="8" y="0" width="4" height="14" />
                 </svg>
               )}
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.9 }}
-              onClick={stopAll}
+              onClick={stop}
               className="w-11 h-11 rounded-full bg-night-lighter border border-purple/30 flex items-center justify-center cursor-pointer hover:border-purple-glow/50 transition-colors"
+              aria-label="Stop"
             >
               <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" className="text-purple-glow/70">
-                <rect width="12" height="12" rx="1"/>
+                <rect width="12" height="12" rx="1" />
               </svg>
             </motion.button>
           </div>
@@ -260,68 +176,28 @@ export default function StoryReader({ story, onHighlight }) {
 
         <div className="flex-1 flex flex-col gap-1">
           <div className="w-full h-1.5 bg-night rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-purple-glow rounded-full transition-all duration-300"
+            <div
+              className="h-full bg-purple-glow rounded-full transition-all duration-200"
               style={{ width: `${progress}%` }}
             />
           </div>
-          {playing && currentParagraph >= 0 && (
-            <span className="text-purple-glow/30 text-[10px]">
-              Paragraph {currentParagraph + 1} of {paragraphs.length}
-            </span>
-          )}
         </div>
       </div>
 
-      <div className="flex items-center gap-3 mt-3 text-xs text-purple-glow/40 flex-wrap">
+      <div className="flex items-center gap-3 mt-3 text-xs text-purple-glow/40">
         <select
-          value={mode === 'api' ? selectedVoice : (selectedSystemVoice?.name || '')}
+          value={selectedVoice}
           onChange={(e) => {
-            if (mode === 'api') {
-              setSelectedVoice(e.target.value)
-            } else {
-              setSelectedSystemVoice(systemVoices.find(v => v.name === e.target.value))
-            }
-            if (playing) stopAll()
+            setSelectedVoice(e.target.value)
+            if (playing) stop()
           }}
-          className="bg-night-lighter border border-purple/20 rounded-lg px-2 py-1 text-purple-glow/60 text-xs cursor-pointer focus:outline-none max-w-[160px]"
+          className="bg-night-lighter border border-purple/20 rounded-lg px-2 py-1 text-purple-glow/60 text-xs cursor-pointer focus:outline-none"
         >
-          {mode === 'api'
-            ? apiVoices.map(v => (
-                <option key={v.id} value={v.id}>{v.label}</option>
-              ))
-            : systemVoices.map(v => (
-                <option key={v.name} value={v.name}>
-                  {v.name.replace(/Microsoft |Google |Apple /, '')}
-                </option>
-              ))
-          }
+          {voices.map(v => (
+            <option key={v.id} value={v.id}>{v.label}</option>
+          ))}
         </select>
-
-        {mode === 'system' && (
-          <div className="flex items-center gap-1.5">
-            <span>Speed</span>
-            <input
-              type="range"
-              min="0.6"
-              max="1.1"
-              step="0.05"
-              value={rate}
-              onChange={(e) => {
-                setRate(parseFloat(e.target.value))
-                if (playing) stopAll()
-              }}
-              className="w-16 accent-purple-glow"
-            />
-            <span>{rate}x</span>
-          </div>
-        )}
-
-        {!isAPIAvailable() && (
-          <span className="text-purple-glow/20 text-[10px]">
-            Using device voice
-          </span>
-        )}
+        <span className="text-purple-glow/20 text-[10px]">Expressive AI voice</span>
       </div>
     </motion.div>
   )
