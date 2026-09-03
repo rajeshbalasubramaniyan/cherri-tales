@@ -64,11 +64,18 @@ export const generateStory = onRequest(
 )
 
 const VOICE_MAP = {
-  warm_female: 'en-US-AriaNeural',
-  gentle_female: 'en-US-JennyNeural',
-  storyteller: 'en-US-AnaNeural',
+  ava: 'en-US-AvaMultilingualNeural',
+  emma: 'en-US-EmmaMultilingualNeural',
+  andrew: 'en-US-AndrewMultilingualNeural',
+  brian: 'en-US-BrianMultilingualNeural',
+  sonia: 'en-GB-SoniaNeural',
+  ana: 'en-US-AnaNeural',
+  // legacy ids kept so older cached clients still resolve
+  warm_female: 'en-US-AvaMultilingualNeural',
+  gentle_female: 'en-US-EmmaMultilingualNeural',
+  storyteller: 'en-US-AvaMultilingualNeural',
   british_female: 'en-GB-SoniaNeural',
-  friendly_male: 'en-US-GuyNeural',
+  friendly_male: 'en-US-AndrewMultilingualNeural',
 }
 
 export const textToSpeech = onRequest(

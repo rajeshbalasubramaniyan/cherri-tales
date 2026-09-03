@@ -9,7 +9,7 @@ export default function StoryReader({ story, onHighlight }) {
   const [error, setError] = useState(false)
   const [progress, setProgress] = useState(0)
   const [currentParagraph, setCurrentParagraph] = useState(-1)
-  const [selectedVoice, setSelectedVoice] = useState('warm_female')
+  const [selectedVoice, setSelectedVoice] = useState('ava')
 
   const audioRef = useRef(null)
   const cacheRef = useRef({})

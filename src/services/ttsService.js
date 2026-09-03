@@ -1,18 +1,19 @@
 const TTS_URL = import.meta.env.VITE_TTS_BASE || ''
 
 const VOICES = [
-  { id: 'warm_female', label: 'Aria (Warm)', description: 'Warm and gentle' },
-  { id: 'gentle_female', label: 'Jenny (Gentle)', description: 'Soft and calming' },
-  { id: 'storyteller', label: 'Sara (Storyteller)', description: 'Expressive narrator' },
-  { id: 'british_female', label: 'Sonia (British)', description: 'Classic storybook' },
-  { id: 'friendly_male', label: 'Guy (Friendly)', description: 'Warm and fun' },
+  { id: 'ava', label: 'Ava (Warm)', description: 'Warm, natural storyteller' },
+  { id: 'emma', label: 'Emma (Bright)', description: 'Bright and friendly' },
+  { id: 'andrew', label: 'Andrew (Dada)', description: 'Calm, warm male' },
+  { id: 'brian', label: 'Brian (Friendly)', description: 'Easygoing male' },
+  { id: 'sonia', label: 'Sonia (British)', description: 'Classic storybook' },
+  { id: 'ana', label: 'Ana (Playful)', description: 'Sweet young voice' },
 ]
 
 export function getAvailableVoices() {
   return VOICES
 }
 
-export async function synthesizeSpeech(text, voiceId = 'warm_female') {
+export async function synthesizeSpeech(text, voiceId = 'ava') {
   if (!TTS_URL) {
     return null
   }
