@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 
-export default function ParentSettings({ onClose, onOpenProfile, hasProfile }) {
+export default function ParentSettings({ onClose, onOpenProfile, hasProfile, onClearDevice }) {
+  const [confirmClear, setConfirmClear] = useState(false)
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -43,10 +45,27 @@ export default function ParentSettings({ onClose, onOpenProfile, hasProfile }) {
           <div className="bg-night-lighter/40 rounded-xl p-4 border border-purple/10">
             <p className="text-moon/60 text-sm font-medium mb-1">About CHERRI TALES</p>
             <p className="text-purple-glow/40 text-xs">
-              Stories are generated using AI, personalized from your child's imagination.
-              No ads, no tracking, no third-party data sharing.
-              All content is filtered for age-appropriateness.
+              Stories are written by AI from your child's choices, and the storyteller is instructed to keep every story gentle and age-appropriate.
+              Only your child's first name and story choices are sent to write a story. Your profile, stories and streaks stay on this device. No ads, no tracking.
             </p>
+          </div>
+
+          <div className="bg-night-lighter/40 rounded-xl p-4 border border-purple/10">
+            <p className="text-moon/60 text-sm font-medium mb-1">Your data on this device</p>
+            {!confirmClear ? (
+              <button onClick={() => setConfirmClear(true)}
+                className="text-xs text-purple-glow/60 underline cursor-pointer hover:text-purple-glow">
+                Remove our family profile, stories and streaks from this device
+              </button>
+            ) : (
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs text-moon/70">This can’t be undone. Remove everything?</span>
+                <button onClick={() => { onClearDevice(); setConfirmClear(false); onClose() }}
+                  className="text-xs bg-cherry/80 text-white px-3 py-1 rounded-full cursor-pointer">Yes, remove</button>
+                <button onClick={() => setConfirmClear(false)}
+                  className="text-xs text-purple-glow/60 underline cursor-pointer">Cancel</button>
+              </div>
+            )}
           </div>
 
           <div className="bg-night-lighter/40 rounded-xl p-4 border border-purple/10">

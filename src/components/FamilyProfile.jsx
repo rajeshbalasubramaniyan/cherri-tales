@@ -136,8 +136,8 @@ export default function FamilyProfile({ onSave, onClose, initialData }) {
             <ul className="text-purple-glow/50 text-xs space-y-2 ml-4 list-disc">
               <li>You are the parent or legal guardian of {data.child.name || 'the child'}</li>
               <li>You consent to {data.child.name || 'your child'} using CHERRI GROUP apps under your supervision</li>
-              <li>You understand we store minimal data and never share it with third parties</li>
-              <li>You can request deletion of all data at any time by emailing daydream@cherri.group</li>
+              <li>You understand this profile is saved only on this device and is never sent to us</li>
+              <li>You can remove it any time from Parent Settings, or email daydream@cherri.group with questions</li>
             </ul>
           </div>
 
@@ -166,8 +166,8 @@ export default function FamilyProfile({ onSave, onClose, initialData }) {
 
           <div className="bg-purple/5 rounded-lg p-3 border border-purple/10">
             <p className="text-purple-glow/30 text-xs">
-              CHERRI GROUP complies with COPPA (US), DPDP Act (India), and UK Age Appropriate Design Code.
-              Your data stays in Firebase asia-south1 (Mumbai). No ads. No tracking. No third parties.
+              CHERRI GROUP is designed around COPPA (US), the DPDP Act (India) and the UK Age Appropriate Design Code.
+              This profile stays on this device. To write a story, only your child's first name and story choices are sent to our AI storyteller. No ads. No tracking.
             </p>
           </div>
         </div>

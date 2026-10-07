@@ -70,7 +70,16 @@ And the Grumblegloom? It started a weekly comedy night. No goats allowed.
 
 And that's the story of how a clueless lad and a clever expert saved a kingdom with a laugh.`
 
-export function buildPrompt(childName, selections) {
+// Reading level guidance by age, so a 4-year-old and a 10-year-old get different stories.
+function readingLevel(age) {
+  if (!age) return 'Use simple language a child can understand'
+  if (age <= 5) return `${age}-year-old listener: very short sentences (5 to 8 words), simple everyday words, lots of repetition, rhythm and fun sound words like "whoosh" and "splash"`
+  if (age <= 7) return `${age}-year-old early reader: short clear sentences, mostly simple words a Year 1 to 2 child can sound out, a little repetition`
+  if (age <= 9) return `${age}-year-old reader: varied sentence lengths and richer vocabulary, with a few interesting new words whose meaning is clear from the story`
+  return `${age}-year-old confident reader: rich vocabulary, varied sentence structures, some similes and metaphors, and a satisfying plot twist`
+}
+
+export function buildPrompt(childName, selections, age) {
   const moodLabels = selections.mood.map(id => moods.find(m => m.id === id)?.label).filter(Boolean)
   const charLabels = selections.characters.map(id => characters.find(c => c.id === id)?.label).filter(Boolean)
   const worldLabels = selections.world.map(id => worlds.find(w => w.id === id)?.label).filter(Boolean)
@@ -92,19 +101,19 @@ Important guidelines:
 - Make it engaging with vivid descriptions and fun dialogue
 - Include humor that both children and parents would enjoy
 - End on a warm, positive note
-- Use simple language a child can understand
+- Reading level: ${readingLevel(age)}
 - Make the story feel personal to ${childName}
 - Break into paragraphs for easy reading
 - Do NOT include any scary, violent, or inappropriate content
 - Write ONLY the story text, no titles or labels`
 }
 
-export async function generateStory(childName, selections) {
+export async function generateStory(childName, selections, age) {
   if (!API_URL) {
     return ANTHRA_STORY
   }
 
-  const prompt = buildPrompt(childName, selections)
+  const prompt = buildPrompt(childName, selections, age)
 
   try {
     const response = await fetch(API_URL, {

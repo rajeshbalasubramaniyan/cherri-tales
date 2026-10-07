@@ -2,12 +2,15 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import Moon from '../components/Moon'
 
-export default function NamePage({ onNext }) {
-  const [name, setName] = useState('')
+const AGES = [4, 5, 6, 7, 8, 9, 10, 11]
+
+export default function NamePage({ onNext, initialName = '', initialAge = null }) {
+  const [name, setName] = useState(initialName)
+  const [age, setAge] = useState(initialAge)
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (name.trim()) onNext(name.trim())
+    if (name.trim()) onNext(name.trim(), age)
   }
 
   return (
@@ -34,10 +37,23 @@ export default function NamePage({ onNext }) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Your name..."
-            autoFocus
+            autoFocus={!initialName}
             maxLength={30}
             className="w-full bg-night-lighter/60 border-2 border-purple/30 rounded-2xl px-5 py-3 sm:px-6 sm:py-4 text-lg sm:text-xl text-center text-moon placeholder-purple-glow/30 font-display focus:outline-none focus:border-purple-glow/60 transition-colors"
           />
+
+          <div>
+            <p className="text-purple-glow/60 text-xs sm:text-sm mb-2">How old are you? <span className="text-purple-glow/40">(so the story fits you)</span></p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {AGES.map(a => (
+                <button key={a} type="button" onClick={() => setAge(age === a ? null : a)}
+                  className={`w-11 h-11 rounded-full font-display text-lg cursor-pointer transition-colors border-2 ${
+                    age === a ? 'bg-purple border-purple-glow text-white' : 'bg-night-lighter/50 border-purple/25 text-purple-glow/70 hover:border-purple-glow/50'}`}>
+                  {a}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <motion.button
             type="submit"

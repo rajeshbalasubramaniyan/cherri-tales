@@ -12,21 +12,35 @@ import DashboardPage from './pages/DashboardPage'
 import { generateStory, getAnthraStory } from './services/storyGenerator'
 import { saveStory, getStoryCount, getStreak } from './services/storyLibrary'
 
+// Kept only on this device (localStorage) — nothing is sent anywhere.
+const CHILD_KEY = 'cherri-tales-child'
+const FAMILY_KEY = 'cherri-tales-family'
+function load(key) {
+  try { return JSON.parse(localStorage.getItem(key) || 'null') } catch { return null }
+}
+function save(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)) } catch { /* storage unavailable */ }
+}
+
 export default function App() {
+  const savedChild = load(CHILD_KEY)
   const [screen, setScreen] = useState('welcome')
-  const [childName, setChildName] = useState('')
+  const [childName, setChildName] = useState(savedChild?.name || '')
+  const [childAge, setChildAge] = useState(savedChild?.age || null)
   const [story, setStory] = useState('')
   const [isAnthraStory, setIsAnthraStory] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
-  const [familyProfile, setFamilyProfile] = useState(null)
+  const [familyProfile, setFamilyProfile] = useState(() => load(FAMILY_KEY))
   const [error, setError] = useState('')
   const lastSelections = useRef(null)
 
   const handleStart = () => setScreen('name')
 
-  const handleName = (name) => {
+  const handleName = (name, age) => {
     setChildName(name)
+    setChildAge(age)
+    save(CHILD_KEY, { name, age })
     setScreen('builder')
   }
 
@@ -35,7 +49,7 @@ export default function App() {
     setError('')
     lastSelections.current = selections
     try {
-      const generatedStory = await generateStory(childName, selections)
+      const generatedStory = await generateStory(childName, selections, childAge)
       const isDefault = generatedStory === getAnthraStory()
       setStory(generatedStory)
       setIsAnthraStory(isDefault)
@@ -54,7 +68,7 @@ export default function App() {
       setIsAnthraStory(true)
       setScreen('story')
     }
-  }, [childName, familyProfile])
+  }, [childName, childAge, familyProfile])
 
   const handleNewStory = () => setScreen('builder')
   const handleHome = () => {
@@ -83,7 +97,12 @@ export default function App() {
 
   const handleSaveProfile = (data) => {
     setFamilyProfile(data)
-    if (data.child.name) setChildName(data.child.name)
+    save(FAMILY_KEY, data)
+    const name = data.child.name || childName
+    const age = data.child.age ? Number(data.child.age) : childAge
+    setChildName(name)
+    setChildAge(age)
+    save(CHILD_KEY, { name, age })
   }
 
   const streak = getStreak()
@@ -119,7 +138,7 @@ export default function App() {
           storyCount={getStoryCount()}
         />
       )}
-      {screen === 'name' && <NamePage onNext={handleName} />}
+      {screen === 'name' && <NamePage onNext={handleName} initialName={childName === 'Little One' ? '' : childName} initialAge={childAge} />}
       {screen === 'builder' && (
         <StoryBuilderPage childName={childName} onGenerate={handleGenerate} />
       )}
@@ -150,6 +169,12 @@ export default function App() {
               setShowProfile(true)
             }}
             hasProfile={!!familyProfile}
+            onClearDevice={() => {
+              try {
+                Object.keys(localStorage).filter(k => k.startsWith('cherri-tales')).forEach(k => localStorage.removeItem(k))
+              } catch { /* storage unavailable */ }
+              setFamilyProfile(null); setChildName(''); setChildAge(null); setScreen('welcome')
+            }}
           />
         )}
       </AnimatePresence>
