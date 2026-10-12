@@ -113,7 +113,7 @@ export default function App() {
     <div className="relative min-h-screen">
       <StarField />
 
-      <div className="fixed top-4 right-4 z-40 flex gap-2">
+      <div className={`fixed right-4 z-[60] flex gap-2 ${showChrome ? 'top-28' : 'top-4'}`}>
         {familyProfile && (
           <div className="w-9 h-9 rounded-full bg-purple/30 border border-purple-glow/30 flex items-center justify-center text-xs text-purple-glow" title="Profile saved">
             ✓
@@ -131,7 +131,7 @@ export default function App() {
         </button>
       </div>
 
-      {showChrome && <SiteNav current="tales" dark className="pr-28" />}
+      {showChrome && <SiteNav dark />}
       {screen === 'welcome' && (
         <WelcomePage
           onStart={handleStart}
@@ -163,7 +163,7 @@ export default function App() {
         />
       )}
 
-      {showChrome && <SiteFooter current="tales" />}
+      {showChrome && <SiteFooter />}
 
       <AnimatePresence>
         {showSettings && (
