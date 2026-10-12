@@ -3,6 +3,7 @@ import { AnimatePresence } from 'framer-motion'
 import StarField from './components/StarField'
 import ParentSettings from './components/ParentSettings'
 import FamilyProfile from './components/FamilyProfile'
+import { SiteNav, SiteFooter } from './components/SiteChrome'
 import WelcomePage from './pages/WelcomePage'
 import NamePage from './pages/NamePage'
 import StoryBuilderPage from './pages/StoryBuilderPage'
@@ -106,6 +107,7 @@ export default function App() {
   }
 
   const streak = getStreak()
+  const showChrome = screen === 'welcome' || screen === 'dashboard'
 
   return (
     <div className="relative min-h-screen">
@@ -129,6 +131,7 @@ export default function App() {
         </button>
       </div>
 
+      {showChrome && <SiteNav current="tales" dark className="pr-28" />}
       {screen === 'welcome' && (
         <WelcomePage
           onStart={handleStart}
@@ -159,6 +162,8 @@ export default function App() {
           onViewStory={handleViewStory}
         />
       )}
+
+      {showChrome && <SiteFooter current="tales" />}
 
       <AnimatePresence>
         {showSettings && (
