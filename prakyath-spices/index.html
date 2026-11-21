@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prakyath Malnada Spices | Farm-fresh spices from Malnad</title>
+  <meta name="description" content="Sun-dried, hand-sorted spices from the rainforest hills of Malnad, Karnataka: black pepper, cardamom, cloves, filter coffee and home-style masalas. Order on WhatsApp." />
+  <meta name="theme-color" content="#1f3d2b" />
+  <meta property="og:title" content="Prakyath Malnada Spices" />
+  <meta property="og:description" content="Spices that grew up in the rain. Farm-fresh from Malnad, Karnataka." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="assets/favicon.png" type="image/png" />
+  <link rel="apple-touch-icon" href="assets/logo-192.png" />
+  <meta property="og:image" content="assets/logo.webp" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=DM+Sans:wght@400;500;700&family=Caveat:wght@600;700&family=Baloo+Tamma+2:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <a class="skip" href="#shop">Skip to shop</a>
+
+  <!-- Free-shipping announcement -->
+  <div class="announce" id="announce">🚚 Free delivery on orders above <b data-free-ship></b><span class="hide-sm"> · Fresh batches packed every week</span></div>
+
+  <header class="hdr" id="hdr">
+    <a class="logo" href="#top" aria-label="Prakyath Malnada Spices home">
+      <img class="logo-mark" src="assets/logo.webp" width="52" height="52" alt="" />
+      <span class="logo-txt"><b>Prakyath</b><small>Malnada Spices</small></span>
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="#shop">Shop</a>
+      <a href="#box">Build a box</a>
+      <a href="#quiz">Spice quiz</a>
+      <a href="#recipes">Recipes</a>
+      <a href="#story">Our story</a>
+    </nav>
+    <button class="cart-btn" id="cartBtn" aria-label="Open bag">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      <span>Bag</span>
+      <b class="cart-count" id="cartCount">0</b>
+    </button>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero" id="hero">
+      <canvas class="hero-canvas" id="heroCanvas" aria-hidden="true"></canvas>
+      <div class="hills" aria-hidden="true">
+        <svg class="hill h1" viewBox="0 0 1440 320" preserveAspectRatio="none"><path d="M0 220 C180 120 320 160 480 110 C640 60 760 150 920 120 C1080 90 1220 30 1440 90 V320 H0Z"/></svg>
+        <div class="mist m1"></div>
+        <svg class="hill h2" viewBox="0 0 1440 320" preserveAspectRatio="none"><path d="M0 250 C200 170 340 230 520 180 C700 130 820 210 1000 170 C1180 130 1300 190 1440 150 V320 H0Z"/></svg>
+        <div class="mist m2"></div>
+        <svg class="hill h3" viewBox="0 0 1440 320" preserveAspectRatio="none"><path d="M0 280 C160 230 300 270 460 240 C640 205 780 275 960 245 C1140 215 1280 260 1440 230 V320 H0Z"/></svg>
+      </div>
+      <button class="hero-badge" id="heroBadge" aria-label="Spill some spices">
+        <img src="assets/logo.webp" width="420" height="420" alt="Prakyath GSHM Malnada Spices logo" />
+        <span class="badge-hint">tap the sack!</span>
+      </button>
+      <div class="hero-in">
+        <p class="eyebrow"><span class="kn">ಮಲೆನಾಡಿನ ಘಮ</span> · the aroma of Malnad</p>
+        <h1>Spices that grew up <em>in the rain.</em></h1>
+        <p class="lede">Sun-dried, hand-sorted pepper, cardamom, coffee and home-style masalas, straight from the misty hills of Malnad to your kitchen.</p>
+        <div class="hero-cta">
+          <a class="btn btn-gold" href="#shop">Shop the harvest</a>
+          <a class="btn btn-ghost" href="#quiz">Find your spice →</a>
+        </div>
+        <ul class="hero-trust">
+          <li>🌿 No added colour</li>
+          <li>☀️ Sun-dried</li>
+          <li>🤲 Small batches</li>
+          <li>💬 Easy WhatsApp ordering</li>
+        </ul>
+        <p class="hero-hint">psst… tap anywhere up here to make it rain pepper</p>
+      </div>
+    </section>
+
+    <!-- MARQUEE -->
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee-track" id="marquee"></div>
+    </div>
+
+    <!-- SHOP -->
+    <section class="sec shop" id="shop">
+      <div class="sec-head">
+        <p class="eyebrow dark">The harvest</p>
+        <h2>Pick your <em>pantry heroes</em></h2>
+        <p class="sub">Tap a jar to smell it (well, almost). Choose a pack size, then add to your bag.</p>
+      </div>
+      <div class="chips" id="chips" role="tablist" aria-label="Filter products"></div>
+      <div class="grid" id="grid"></div>
+    </section>
+
+    <!-- BOX BUILDER -->
+    <section class="sec box" id="box">
+      <div class="box-wrap">
+        <div class="box-copy">
+          <p class="eyebrow">Gift it · stock up</p>
+          <h2>Build your <em>Malnada Box</em></h2>
+          <p class="sub light">Pick any <b data-box-size></b> spices and save <b data-box-off></b>. Good for your own kitchen, and great as a gift.</p>
+          <div class="box-picks" id="boxPicks"></div>
+        </div>
+        <div class="crate-col">
+          <div class="crate" id="crate" aria-live="polite"></div>
+          <div class="box-price" id="boxPrice"></div>
+          <button class="btn btn-gold wide" id="boxAdd" disabled>Add box to bag</button>
+          <button class="link-btn" id="boxClear">Empty the crate</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUIZ + GRIND GAME -->
+    <section class="sec play" id="quiz">
+      <div class="sec-head">
+        <p class="eyebrow dark">Play a little</p>
+        <h2>Two ways to <em>win a treat</em></h2>
+        <p class="sub">Find your spice twin for free delivery, or grind some pepper for 10% off.</p>
+      </div>
+      <div class="play-grid">
+        <article class="card quiz" id="quizCard" aria-live="polite"></article>
+        <article class="card grind" id="grindCard">
+          <h3>Grind it fresh!</h3>
+          <p class="grind-sub">Tap the mortar (or press space) <b>25 times in 10 seconds</b>. Ajji did it every morning. Can you?</p>
+          <button class="mortar-btn" id="mortar" aria-label="Grind the pepper">
+            <svg viewBox="0 0 220 200" class="mortar-svg" aria-hidden="true">
+              <g class="pestle" id="pestle">
+                <rect x="132" y="6" width="26" height="110" rx="13" transform="rotate(22 145 60)" fill="#a77a4f"/>
+                <rect x="132" y="6" width="26" height="30" rx="13" transform="rotate(22 145 60)" fill="#c69767"/>
+              </g>
+              <ellipse cx="110" cy="100" rx="88" ry="18" fill="#3a2b20"/>
+              <clipPath id="bowlClip"><path d="M22 100 Q22 180 110 182 Q198 180 198 100 Z"/></clipPath>
+              <path d="M22 100 Q22 180 110 182 Q198 180 198 100 Z" fill="#6b4f3a"/>
+              <g clip-path="url(#bowlClip)"><rect id="powder" x="0" y="182" width="220" height="90" fill="#4a3b30"/></g>
+              <g id="corns"></g>
+              <path d="M22 100 Q22 180 110 182 Q198 180 198 100" fill="none" stroke="#2b1f17" stroke-width="5"/>
+              <ellipse cx="110" cy="100" rx="88" ry="18" fill="none" stroke="#2b1f17" stroke-width="5"/>
+              <rect x="70" y="180" width="80" height="14" rx="6" fill="#4d382a"/>
+            </svg>
+          </button>
+          <div class="grind-bar"><span id="grindFill"></span></div>
+          <div class="grind-stats"><span id="grindTaps">0 / 25</span><span id="grindTime">10.0s</span></div>
+          <div class="grind-result" id="grindResult"></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- STORY / JOURNEY -->
+    <section class="sec story" id="story">
+      <div class="sec-head">
+        <p class="eyebrow">From vine to jar</p>
+        <h2>The long, slow <em>Malnad way</em></h2>
+        <p class="sub light">Malnad is the rainforest belt of Karnataka's Western Ghats. Heavy monsoon rain and shade-grown farms give these spices their strong aroma. We keep the rest simple.</p>
+      </div>
+      <div class="journey" id="journey">
+        <svg class="vine" viewBox="0 0 1000 120" preserveAspectRatio="none" aria-hidden="true">
+          <path id="vinePath" d="M0 60 C120 10 200 110 330 60 S540 10 660 60 S870 110 1000 60" fill="none" stroke="#8db255" stroke-width="5" stroke-linecap="round"/>
+        </svg>
+        <ol class="steps">
+          <li class="step"><span class="step-ic">🌧️</span><h3>Grown in the rain</h3><p>Pepper vines climb shade trees through months of monsoon. No hurry.</p></li>
+          <li class="step"><span class="step-ic">🧺</span><h3>Picked by hand</h3><p>Harvested when ripe, cluster by cluster, by people who know each vine.</p></li>
+          <li class="step"><span class="step-ic">☀️</span><h3>Sun-dried</h3><p>Spread on mats under the winter sun until they're crackling dry.</p></li>
+          <li class="step"><span class="step-ic">🫙</span><h3>Packed fresh</h3><p>Cleaned, sorted and packed in small batches, then sent to you.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- RECIPES -->
+    <section class="sec recipes" id="recipes">
+      <div class="sec-head">
+        <p class="eyebrow dark">Cook it tonight</p>
+        <h2>Recipes with a <em>one-tap shopping list</em></h2>
+        <p class="sub">Flip a card for the recipe. Add everything you need in one go.</p>
+      </div>
+      <div class="recipe-grid" id="recipeGrid"></div>
+    </section>
+
+    <!-- REVIEWS (hidden until real reviews are added in config) -->
+    <section class="sec reviews" id="reviews" hidden>
+      <div class="sec-head">
+        <p class="eyebrow dark">Kind words</p>
+        <h2>From kitchens <em>across India</em></h2>
+      </div>
+      <div class="review-row" id="reviewRow"></div>
+    </section>
+
+    <!-- INSTAGRAM -->
+    <section class="sec insta">
+      <div class="insta-card">
+        <div class="insta-dots" aria-hidden="true"></div>
+        <p class="eyebrow">Join the Malnad family</p>
+        <h2>See the farms, the harvest <em>and what's packing this week</em></h2>
+        <p class="sub light">Follow us for fresh-batch drops, recipes and life in the hills.</p>
+        <a class="btn btn-gold" id="instaLink" target="_blank" rel="noopener">Follow <span data-insta-handle></span></a>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="sec faq" id="faq">
+      <div class="sec-head">
+        <p class="eyebrow dark">Good to know</p>
+        <h2>Questions, <em>answered</em></h2>
+      </div>
+      <div class="faq-list" id="faqList"></div>
+    </section>
+  </main>
+
+  <footer class="ftr">
+    <div class="ftr-in">
+      <div>
+        <img class="ftr-logo" src="assets/logo.webp" width="84" height="84" alt="" loading="lazy" />
+        <p class="ftr-brand">Prakyath Malnada Spices</p>
+        <p class="ftr-small">GSHM</p>
+        <p class="kn ftr-kn">ಮಲೆನಾಡಿನ ಘಮ, ನಿಮ್ಮ ಅಡುಗೆಮನೆಗೆ</p>
+        <p class="ftr-small">Farm-fresh spices from the Western Ghats of Karnataka.</p>
+      </div>
+      <div class="ftr-links">
+        <a href="#shop">Shop</a><a href="#box">Malnad Box</a><a href="#faq">FAQ</a>
+        <a id="ftrInsta" target="_blank" rel="noopener">Instagram</a>
+        <a id="ftrWa" target="_blank" rel="noopener">WhatsApp</a>
+      </div>
+    </div>
+    <p class="ftr-copy">© <span id="yr"></span> Prakyath Malnada Spices</p>
+  </footer>
+
+  <!-- Floating WhatsApp -->
+  <a class="wa-float" id="waFloat" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><path fill="#fff" d="M16 3a13 13 0 0 0-11.2 19.6L3 29l6.6-1.7A13 13 0 1 0 16 3Zm0 23.7a10.7 10.7 0 0 1-5.5-1.5l-.4-.2-3.9 1 1-3.8-.3-.4A10.7 10.7 0 1 1 16 26.7Zm5.9-8c-.3-.2-1.9-1-2.2-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7 0a8.8 8.8 0 0 1-4.4-3.8c-.3-.6.3-.5 1-1.7a.6.6 0 0 0 0-.6l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6a1.2 1.2 0 0 0-.9.4 3.7 3.7 0 0 0-1.1 2.7 6.4 6.4 0 0 0 1.3 3.4 14.7 14.7 0 0 0 5.7 5c2.1.9 2.9 1 4 .8a3.4 3.4 0 0 0 2.2-1.6 2.8 2.8 0 0 0 .2-1.6c0-.2-.3-.3-.6-.5Z"/></svg>
+  </a>
+
+  <!-- Sticky mobile bag bar -->
+  <button class="mbar" id="mbar" hidden>
+    <span id="mbarTxt">0 items</span>
+    <b>View bag →</b>
+  </button>
+
+  <!-- CART DRAWER -->
+  <div class="scrim" id="scrim" hidden></div>
+  <aside class="drawer" id="drawer" aria-label="Your bag" aria-hidden="true">
+    <div class="dr-head">
+      <h2 id="drTitle">Your bag</h2>
+      <button class="x" id="drClose" aria-label="Close bag">✕</button>
+    </div>
+    <div class="ship-meter" id="shipMeter"><p id="shipTxt"></p><div class="ship-bar"><span id="shipFill"></span><i id="shipTruck">🚚</i></div></div>
+    <div class="dr-body" id="drBody"></div>
+    <div class="dr-foot" id="drFoot"></div>
+  </aside>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="assets/config.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
